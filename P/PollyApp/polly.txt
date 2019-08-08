@@ -1,0 +1,227 @@
+  
+  + ------------------------------
+  | WHAT DOES POLLY DO?
+  |
+  |       Restore - Without any plugin saver TiddlyWiki uses the browser "downloads" folder
+  |       -------   to save files like this ...
+  |
+  |                      mywiki (3).html
+  |                      mywiki (2).html
+  |                      mywiki.html 
+  |
+  |                 With each new save the number increases by 1. 
+  |
+  |                 Polly works out what wiki saved which file and RESTORES the 
+  |                 latest version, removing the number and overwriting the original.
+  |
+  |                 When the user RELOADS their wiki in the browser the restored version
+  |                 loads.
+  |                         
+  |        Backup - Polly can make a copy of your wikis and time-stamp them to a 
+  |        ------   backup directory. 
+  |
+  |                 The latest backup is always of the previous version of a wiki, 
+  |                 not the latest restored version.
+  | 
+  |   Zip Archive - Polly can create a zip archive of your wiki and archive a 
+  |   -----------   time-stamped version to a Zip file.
+  |
+  |                 The latest archive is always of the previous version of a wiki, 
+  |                 not the latest restored version.
+  |   
+  |        Parrot - A "parrot" is a clone, or copy, of a wiki to another
+  |        ------   location. Parrots include TiddlyWiki based websites being
+  |                 prepared for upload to the internet. Automating this
+  |                 process through Polly is labour saving.
+  |
+  |                 Note: Parroted wikis get over-written by the latest 
+  |                 restored version of the wiki.      
+  |
+  |                 Parrot Mode - There is also a "parrot" (only) mode. This "parrots" 
+  |                 any files under [wikis] listed for cloning in [parrots].
+  |                 It copies the files regardless of whether they are restored or not 
+  |                 Its most useful if you are maintaining a secondary repository. [NOT YET DONE].
+
+
+  + ------------------------------
+  | INSTALLATION
+  |
+  |                 TiddlyWiki 5 - Polly works with TW5 on all modern browsers. Any browser 
+  |                                with "download saving" should work with Polly. 
+  |
+  |                   TW Classic - Polly works with TWC on most modern browsers. [NEEDS CHECKING]
+  |                                An exception is Edge. Chromium/ Edge (expand) work with TWC. 
+  |
+  |  Requirements - ??? Windows ver? Powershell lowest ver?
+  |  ------------
+  |                 Polly installation makes NO changes to your computer's
+  |                 setup. 
+  | 
+  |                 Note: you may need to grant permissions, after installing, 
+  |                 to let it run.
+  |
+  |       STEPS
+  |
+  |   1. Download - ??? What, where?. 
+  |      --------   
+  |                 Downloads of Polly carry their version as a 3 character string. 
+  |                 For instance: "polly-01p.zip" is "version '01', edition 'p'. 
+  |                 The version will be displayed when you run Polly. You can
+  |                 ignore it, unless you have a problem to report.
+  |
+  |   2.  Unblock - Once you have downloaded "polly-xxx.zip", navigate to 
+  |       -------   downloads in a file explorer and right-click the file.
+  |                 Click on "Properties" and look for "Unblock" and select and
+  |                 Apply it. 
+  |   
+  |                 This will "Unblock" all scripts in the downloaded zip file.
+  |
+  |   3.   Un-Zip - Once you have "Unblocked" the downloaded the zip, right click 
+  |        ------   to "Extract All". 
+  | 
+  |   4.   Folder - Create a folder where you want to install Polly. (It can
+  |        ------   be anywhere.) Copy the contents of the un-zipped "polly-xxx" 
+  |                 folder to it.
+  |
+  |                 Polly should now be installed on your computer
+
+
+  + ------------------------------
+  | EXECUTION POLICY
+  |
+  |   Polly is written in the Windows scripting language "PowerShell".
+  |
+  |   In can happen that, initially, running scripts may not be allowed due to 
+  |   an existing "ExecutionPolicy" on the computer.
+  |   
+  |   Its easy to change the policy to be able to run Polly. There are 
+  |   notes on Permissions here ... [EXPAND]
+
+
+  + ------------------------------
+  | CREATING A "SETTINGS.INI" FILE
+  |
+  |         Start - Click "polly.bat" to start Polly. On first run you may see a
+  |         -----   message saying ... [NOT DONE YET]
+  | 
+  |                      "Now, let's create your first settings file!"
+  |
+  |                 Your first settings file must be called "settings.ini". Polly detects 
+  |                 if it exists and will prompt you to make it if it doesn't. 
+  |                 Once created you can have as many additional ".ini" setting files 
+  |                 as you want. 
+  |
+  |        Naming - BEFORE you add any settings for Polly its important to
+  |        ------   understand it utilises the "downloads" folder. And the downloads
+  |                 folder can only accurately save files with unique names.
+  |    
+  |                 So, all wikis monitored by Polly, MUST have *UNIQUE* names. 
+  |
+  |         Paths - All *wiki files* you want Polly to monitor and their *directories* should
+  |         -----   exist before you enter them in settings.
+  |
+  |                 All *directories* for Backups, Zip Archives and Parrots should exist before. 
+  |                 you enter them in settings.
+  | 
+  |                 If paths don't exist when Polly runs a restore PowerShell will present error messages.
+  | 
+  |      Portable - Polly can be used portably from a USB stick if paths [NOT WORKING YET]
+  |       Pathing   in settings to wikis use relative addressing. All relative pathing needs
+  |       -------   to be relative to the application directory.
+  |
+  |                 Note: the "Downloads" folder still needs to be at an 
+  |                 absolute address. This is because most browsers require it.
+  |
+  |
+  |       .INI FILE
+  |
+  |                 "*" indicates minimal settings required for Polly to function. 
+  |
+  |   * [general] - Required. Section header for basic settings 
+  |
+  |                 inidescription=
+  |                    Optional. Useful if you have more than one .ini file.
+  |
+  |                 waitseconds=
+  |                    Optional. Seconds to wait between checks in "auto" mode.
+  |                              Defaults to 60 seconds.
+  |
+  |   *             downloaddir= 
+  |                    Required. Directory where browser downloads are saved.
+  |    
+  |                 wikidir=
+  |                    Optional. Useful if your wikis are nested under one directory.
+  |
+  |                 backupdir=
+  |                    Optional. Directory to create date-stamped backups in.
+  |
+  |                 backupzipdir=
+  |                    Optional. Directory to create date-stamped zip archives in.
+  |
+  |                 A basic settings file might look like this ...
+  |
+  |                    [general] 
+  |                    inidescription=My Basic Settings
+  |                    downloaddir=C:\Users\Polly\Downloads
+  |                    wikidir=C:\Users\Polly\Documents\tw-wikis
+  |
+  |                 If a setting is not defined its corresponding menu
+  |                 item in Polly in "menu" mode is not shown. 
+  |
+  |   *   [wikis] - Required. And you need at least one wiki under it. In this section you 
+  |                 add the paths to the wikis you want Polly to monitor & 
+  |                 restore. One wiki per line, for example ...
+  |
+  |                    [wikis]
+  |                    file1=C:\users\jon\notes.html
+  |                    toDoWiki=C:\users\jon\mywikis\todo.html
+  |                    ;file2=C:\photos\photo-album.htm
+  |
+  |                 Wiki names must be UNIQUE.
+  |
+  |                 Each file is preceded by a unique identifer, e.g.
+  |                 "file1" followed by "=". The identifier should 
+  |                 only contain letters or numbers. No spaces or 
+  |                 special punctuation.
+  |
+  |                 Lines starting ";" are ignored. This lets you 
+  |                 switch off restoration for that wiki.
+  | 
+  |    [parrots] - Optional. Under this section add paths in the same way  
+  |                as for [wikis] ...
+  |
+  |                    [parrots]
+  |                    parrot1=C:\users\jon\Dropbox\notes.html
+  |                    parrot2=C:\website\photo-album.htm
+  |
+  |                The names of parrot wiki need to match the names of
+  |                items in the [wikis] section since [parrots] clone items
+  |                in [wikis]
+  |
+  |                Parrots can include any type of file. 
+
+ 
+  + ------------------------------
+  | USAGE
+  |
+  |  powershell -file .\polly.ps1 [-ini "settingsfile.ini"] [-run "menu"|"auto"|"once"|"parrot"]
+  |
+  |             -ini   "settingsfile.ini", a user defined settings file 
+  |
+  |                    without an -ini parameter Polly loads "settings.ini"
+  |                    without "settings.ini" present Polly prompts the user to create it [NOT YET DONE]
+  |
+  |             -run   "menu"    displays menu (which can start all other modes)
+  |                    "auto"    checks & restores wikis at user set intervals
+  |                    "once"    checks & restores wikis, then exists
+  |                    "parrot"  runs extended parroting (only), then exits [NOT YET DONE]
+  |
+  |                    without a -run parameter Polly runs "menu" mode
+  |
+  |                    Polly comes with three ready to run batch files ...
+  |
+  |                    "polly.bat"      runs Polly in "menu" mode
+  |                    "polly-auto.bat" runs Polly in "auto" mode
+  |                    "polly-once.bat" runs Polly in "once" mode 
+  |
+  |                    all load the default "settings.ini" file
