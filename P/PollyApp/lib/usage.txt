@@ -1,0 +1,27 @@
+  |
+  |  powershell -file .\polly.ps1 [-ini "settingsfile.ini"] [-run "menu"|"auto"|"once"|"parrot"]
+  |
+  |   -----------------------------------------------------------------------------------------
+  |
+  | Command Line   -ini   "settingsfile.ini", a user defined settings file 
+  |   Parameters         
+  |   ----------     Without an -ini parameter Polly loads "settings.ini".     
+  |                  Without "settings.ini" present Polly prompts to create it.
+  |                  Once created users can make any number of additional ".ini" files.
+  |  
+  |                -run   "menu"    displays menu (which can start all other modes)                
+  |                       "auto"    checks & restores wikis at user set intervals
+  |                       "once"    checks & restores wikis, then exists
+  |                       "parrot"  runs extended parroting (only), then exits [NOT YET DONE]
+  |
+  |                  Without a -run parameter Polly runs in "menu" mode.
+  |
+  |  Batch Files   Polly comes with three batch files ...
+  |  -----------             
+  |                       "polly.bat"      runs Polly in "menu" mode
+  |                       "polly-auto.bat" runs Polly in "auto" mode
+  |                       "polly-once.bat" runs Polly in "once" mode 
+  |
+  |                  All load the default "settings.ini" file.
+  |                  The user can create as many ".bat" files as needed to load any "-ini". 
+
