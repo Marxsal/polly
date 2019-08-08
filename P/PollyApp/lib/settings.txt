@@ -1,0 +1,65 @@
+  | .INI FILE SETTINGS
+  |
+  |
+  |  "*" indicates minimal settings required for Polly to function. 
+  |
+  |   * [general] - Required. Section header for basic settings 
+  |
+  |                 inidescription=
+  |                    Optional. Useful if you have more than one .ini file.
+  |
+  |                 waitseconds=
+  |                    Optional. Seconds to wait between checks in "auto" mode.
+  |                              Defaults to 60 seconds.
+  |
+  |   *             downloaddir= 
+  |                    Required. Directory where browser downloads are saved.
+  |    
+  |                 wikidir=
+  |                    Optional. Useful if your wikis are nested under one directory.
+  |
+  |                 backupdir=
+  |                    Optional. Directory to create date-stamped backups in.
+  |
+  |                 backupzipdir=
+  |                    Optional. Directory to create date-stamped zip archives in.
+  |
+  |                 A basic settings file might look like this ...
+  |
+  |                    [general] 
+  |                    inidescription=My Basic Settings
+  |                    downloaddir=C:\Users\Polly\Downloads
+  |                    wikidir=C:\Users\Polly\Documents\tw-wikis
+  |
+  |                 If a setting is not defined its corresponding menu item in Polly
+  |                 in "menu" mode is not shown. 
+  |
+  |   *   [wikis] - Required. And you need at least one wiki under it. In this  
+  |                 section you add the paths to the wikis you want Polly to monitor 
+  |                 & restore. One wiki per line, for example ...
+  |
+  |                    [wikis]
+  |                    file1=C:\users\jon\notes.html
+  |                    toDoWiki=C:\users\jon\mywikis\todo.html
+  |                    ;file2=C:\photos\photo-album.htm
+  |
+  |                 Wiki names must be UNIQUE.
+  |
+  |                 Each file is preceded by a unique identifer, e.g. "file1"
+  |                 followed by "=". The identifier should only contain letters or
+  |                 numbers. No spaces or special punctuation.
+  |                 
+  |                 Lines starting ";" are ignored. This lets you switch off 
+  |                 restoration for that wiki.
+  | 
+  |     [parrots] - Optional. Under this section you add paths in the same way as for 
+  |                 [wikis] ...
+  |
+  |                    [parrots]
+  |                    parrot1=C:\users\jon\Dropbox\notes.html
+  |                    parrot2=C:\website\photo-album.htm
+  |
+  |                 The names of parrot wiki need to match the names of items in the
+  |                 [wikis] section since [parrots] clone items in [wikis].
+  |
+  |                 Parrots can include any type of file. 
