@@ -1,4 +1,4 @@
-﻿# polly-01k-TT.ps1
+﻿# polly-01L-MS.ps1 -- Relative directories
 
 # GET COMMAND-LINE PARAMETERS -----------------
   param ([string]$ini, [string]$run); cls
@@ -13,6 +13,17 @@
     . .\lib\Get-IniContent.ps1 
   # Core libraries used
     $libs = ".\lib\Get-IniContent.ps1"
+
+  function expand-dir {
+  param( [string]$pDirname )
+     if ([string]::IsNullOrEmpty($pDirname)) {return $null } 
+     $dirName = [System.Environment]::ExpandEnvironmentVariables($pDirname)
+     if( ![System.IO.Path]::IsPathRooted($dirName) ) {
+         $dirName = "$scriptDir\$dirName"
+     }
+     return $dirName 
+  }
+
   # --- EXTENSIONS [TESTING]
     #. .\dev\experiments.ps1
 
@@ -22,7 +33,7 @@
   #region InternalSettings
 
   # --- APPLICATION NAME & VERSION 
-    $appAndVer = "POLLY v0.1k-TT"
+    $appAndVer = "POLLY v0.1l-MS (rel dirs)"
 
   # --- CONSOLE
     $console = $host.UI.RawUI
@@ -86,7 +97,23 @@
   # --- GET SETTINGS FROM .INI FILE 
   $settings = Get-IniContent "$scriptDir\$settingsFile"; 
   $general = $settings["general"] ;
-  $files = $settings["wikis"].values ;
+  $filesHolder = $settings["wikis"].values ;
+
+  # --- Parse files, converting to absolute paths
+    #echo "I think count is $files.length"
+    #get-member -InputObject $files
+    $files = @()
+    #for ($i = 0; $i -le ($files.length - 1); $i += 1) {
+    foreach($file in $filesHolder) {
+        $file = expand-dir($file) 
+        #if( ![System.IO.Path]::IsPathRooted($file) ) {
+        #    $file = "$scriptDir\$file"
+        #}
+        $files += $file  
+        echo "Expanded and absoluted file: $file"
+    }
+  
+
   $parrots = $settings["parrots"].values ;
 
   # --- Parse "parrots" into "pollies" so we don't have to repeat this step
@@ -123,16 +150,21 @@
     $downloaddir = $general["downloaddir"]
     # If not defined use o/s "userprofile" variable
     if ([string]::IsNullOrEmpty($downloaddir)){$downloaddir = "$Env:userprofile\Downloads"}
+    # Expand dir in case it contains environmental variables. Also conform to absolute address
+    $downloaddir = expand-dir($downloaddir)
     # ?? should add a path check ?? Some (few?) users reset through registry the downloads dir!
+
   
   # --- WIKIS DIRECTORY (optional): useful where wikis are nested under one directory
     $wikidir = $general["wikidir"]
       
   # --- WIKIS BACKUP DIR (optional): where to create date-stamped backups
-    $backupdir= $general["backupdir"]
-  
+    $backupdir= expand-dir $general["backupdir"]
+    #$backupdir = expand-dir $backupdir
+    
+
   # --- WIKIS BACKUP ZIP DIR (optional): where to create date-stamped zip archives
-    $backupzipdir= $general["backupzipdir"]
+    $backupzipdir= expand-dir $general["backupzipdir"]
 
   # --- TIMING: seconds to wait between checks
     $waitSeconds = $general["waitseconds"]
@@ -331,7 +363,7 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
            echo ""     
           }
       'Z' {if($hideTests -ne "show"){cls} else {cls; echo ""; runinfo; tests}}
-      'Q' {cls; exit}
+      'Q' {cls ; exit}
     }
   }
   until ($selection -eq 'a' -or $selection -eq 'o')
@@ -342,8 +374,8 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
   # Make sure script now runs in downloads directory
   # --- !! Running in downloads was a mistake on my part :-( 
   # --- !! It breaks portability. Need to fix. !!
-  cd $downloaddir
-  cls
+  #cd $downloaddir
+  #cls MAS
   echo ""
   echo "  || AUTO-RESTORE - $appAndVer"
   echo "  ||"
@@ -380,7 +412,7 @@ while(1) {
       $pattern = [regex]::escape($stem) +  "(\s*\(\d+\))*" + [regex]::escape('.'+$exten) 
       echo "|   Using Pat: $pattern"
       #$copyme = ls $stem*.$exten | sort LastWriteTime | select -last 1
-      $copyme = gci $stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort LastWriteTime | select -last 1
+      $copyme = gci $downloaddir\$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort LastWriteTime | select -last 1
 
 # --- TT tests on left
 $short_name = $copyme.Name
@@ -480,7 +512,8 @@ $short_name = $copyme.Name
       echo "  ||"
       echo "  || Closes in $closeSeconds seconds ..."
       start-sleep -seconds $closeSeconds
-      cls; exit
+      #cls; 
+exit
     }
     else {
       echo ""
