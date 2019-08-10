@@ -110,7 +110,7 @@
         #    $file = "$scriptDir\$file"
         #}
         $files += $file  
-        echo "Expanded and absoluted file: $file"
+        #echo "Expanded and absoluted file: $file"
     }
   
 
@@ -121,7 +121,7 @@
   $pollies = @{} 
     foreach ($parrot in $parrots) {
       $parrotName = $parrot.split("\")[-1]
-      echo "I see parrot stem: $parrotName " 
+      #echo "I see parrot stem: $parrotName " 
       #$parrotName
       $parrotDir = $parrot.substring(0,$parrot.length - $parrotName.length) 
 
@@ -136,10 +136,10 @@
   
   # --- TESTING POLLIES
   if ($pollies.Count -gt 0 ) {
-     echo "I don't think pollies is null. Here's what I see: "
+     #echo "I don't think pollies is null. Here's what I see: "
      foreach ($polly in $pollies.keys) {
         $temp = $pollies[$polly]
-        echo "I see polly $polly with dir $temp "
+        #echo "I see polly $polly with dir $temp "
      }
   }
   
@@ -153,7 +153,6 @@
     # Expand dir in case it contains environmental variables. Also conform to absolute address
     $downloaddir = expand-dir($downloaddir)
     # ?? should add a path check ?? Some (few?) users reset through registry the downloads dir!
-
   
   # --- WIKIS DIRECTORY (optional): useful where wikis are nested under one directory
     $wikidir = $general["wikidir"]
@@ -375,7 +374,7 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
   # --- !! Running in downloads was a mistake on my part :-( 
   # --- !! It breaks portability. Need to fix. !!
   #cd $downloaddir
-  #cls MAS
+  cls
   echo ""
   echo "  || AUTO-RESTORE - $appAndVer"
   echo "  ||"
@@ -512,8 +511,7 @@ $short_name = $copyme.Name
       echo "  ||"
       echo "  || Closes in $closeSeconds seconds ..."
       start-sleep -seconds $closeSeconds
-      #cls; 
-exit
+      cls; exit
     }
     else {
       echo ""
