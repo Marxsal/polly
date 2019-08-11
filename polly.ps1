@@ -1,7 +1,8 @@
-﻿# polly-01L-MS.ps1 -- Relative directories
+﻿# polly-01M-MS.ps1 -- Relative directories
 
 # GET COMMAND-LINE PARAMETERS -----------------
-  param ([string]$ini, [string]$run); cls
+  param ([string]$ini, [string]$run); 
+  cls
 
 # SET RUN LOCATION ----------------------------
   cd "$PSScriptRoot"
@@ -18,7 +19,14 @@
   param( [string]$pDirname )
      if ([string]::IsNullOrEmpty($pDirname)) {return $null } 
      $dirName = [System.Environment]::ExpandEnvironmentVariables($pDirname)
-     if( ![System.IO.Path]::IsPathRooted($dirName) ) {
+
+#if ($isWindows) { echo I think this is windows }
+#if ($isLinux) { echo I think his is linux }
+
+     if( ($isLinux -or $isMacOS) -and !$dirName.StartsWith("/") -and !$dirName.StartsWith("~")  ) {
+         $dirName = "$scriptDir/$dirName"
+     }
+     if( $isWindows -and ![System.IO.Path]::IsPathRooted($dirName) ) {
          $dirName = "$scriptDir\$dirName"
      }
      return $dirName 
@@ -31,14 +39,25 @@
 
 # INTERNAL SETTINGS ---------------------------
   #region InternalSettings
+  
+ $SEPARATOR= [IO.Path]::DirectorySeparatorChar
+
+if ( $PSVersionTable.PSVersion.major -lt 6) {
+#These variables are available automatically in vs 6
+    $isWindows = true ;
+    $isMacOS = false ;
+    $isLinjux = false ;
+}
 
   # --- APPLICATION NAME & VERSION 
-    $appAndVer = "POLLY v0.1l-MS (rel dirs)"
+    $appAndVer = "POLLY v0.1m-MS (PS6)"
 
   # --- CONSOLE
     $console = $host.UI.RawUI
     $console.WindowTitle = "$appAndVer -- $mode mode"
+if($isWindows) {
     $console.BufferSize = New-Object System.Management.Automation.Host.Size(165,5000)
+}
     $console.ForegroundColor = "yellow"
 
   # --- RUN MODE
@@ -105,7 +124,9 @@
     $files = @()
     #for ($i = 0; $i -le ($files.length - 1); $i += 1) {
     foreach($file in $filesHolder) {
+#echo "File before expansion: $file"
         $file = expand-dir($file) 
+#echo "File after expansion: $file"
         #if( ![System.IO.Path]::IsPathRooted($file) ) {
         #    $file = "$scriptDir\$file"
         #}
@@ -120,7 +141,7 @@
   #     every time a file is restored.
   $pollies = @{} 
     foreach ($parrot in $parrots) {
-      $parrotName = $parrot.split("\")[-1]
+      $parrotName = $parrot.split($SEPARATOR)[-1]
       #echo "I see parrot stem: $parrotName " 
       #$parrotName
       $parrotDir = $parrot.substring(0,$parrot.length - $parrotName.length) 
@@ -177,7 +198,7 @@
 #$settings = Get-IniContent "$scriptDir\$settingsFile"; 
 
 $files = $settings["wikis"].values ;
-foreach ($obj in $files) {echo "I see stem: " $obj.split("\")[-1]  } 
+foreach ($obj in $files) {echo "I see stem: " $obj.split($SEPARATOR)[-1]  } 
 $objMembers = $settings["wikis"].psobject.members | where-object Name -like 'file'; 
 $objMembers ;
 foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
@@ -224,7 +245,7 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
     echo "  | Once-mode timer: $closeSeconds seconds to close after restore"
     echo "  |"
     echo "  |    Script drive: $scriptDrv"
-    echo "  |      Script dir: $scriptDir\"
+    echo "  |      Script dir: $scriptDir$SEPARATOR"
     echo "  |      PS1 script: $scriptFile"
     echo "  |       Libraries: $libs" 
     echo "  |"
@@ -374,7 +395,7 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
   # --- !! Running in downloads was a mistake on my part :-( 
   # --- !! It breaks portability. Need to fix. !!
   #cd $downloaddir
-  cls
+   cls 
   echo ""
   echo "  || AUTO-RESTORE - $appAndVer"
   echo "  ||"
@@ -392,7 +413,8 @@ while(1) {
     # OLD for($i=0;$i -lt $files.Length; $i++) {
     foreach($file in $files) {
       #$filePath = $[$i]
-      $fileName = $file.split("\")[-1]
+#echo "File name before split: $file"
+      $fileName = $file.split($SEPARATOR)[-1]
       echo ""
       echo "| $fileName"
       echo "|"
@@ -411,7 +433,8 @@ while(1) {
       $pattern = [regex]::escape($stem) +  "(\s*\(\d+\))*" + [regex]::escape('.'+$exten) 
       echo "|   Using Pat: $pattern"
       #$copyme = ls $stem*.$exten | sort LastWriteTime | select -last 1
-      $copyme = gci $downloaddir\$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort LastWriteTime | select -last 1
+#echo "Parts --  dl: $downloaddir sep: $SEPARATOR stem: $stem ext: $exten"
+      $copyme = gci $downloaddir$SEPARATOR$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort-object -property LastWriteTime | select -last 1
 
 # --- TT tests on left
 $short_name = $copyme.Name
@@ -431,7 +454,7 @@ $short_name = $copyme.Name
       $copyme = $copyme_fullname
       #echo "Checking fullname $copyme_fullname"
 
-      $destination = Get-Item  "$fileDir\$stem.$exten"
+      $destination = Get-Item  "$fileDir$SEPARATOR$stem.$exten"
       $destinationTimestamp = $destination.LastWriteTime
       #$dt = $destinationTimestamp 
       $source = Get-Item "$copyme" 
@@ -449,14 +472,14 @@ $short_name = $copyme.Name
               $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" $exten 
               echo "|"
               echo "|      Backup: ""$archiveFilename"" of wiki ..."
-              echo "|    saved in: $backupdir\$stem.$exten\"
+              echo "|    saved in: $backupdir$SEPARATOR$stem.$exten\"
               #echo "Making backup from $destination to $backupdir\$archiveFilename"
 
               #$ProgressPreference = 'SilentlyContinue'
               #echo  "$backupdir\$stem.$exten\"
               #md -Path "$backupdir\$stem.$exten\" 
-              Make-Directory "$backupdir\$stem.$exten\"  
-              Copy-item $destination -Destination "$backupdir\$stem.$exten\$archiveFilename"
+              Make-Directory "$backupdir$SEPARATOR$stem.$exten$SEPARATOR"  
+              Copy-item $destination -Destination "$backupdir$SEPARATOR$stem.$exten$SEPARATOR$archiveFilename"
               #$ProgressPreference = 'Continue'
           }
           # Want to perform ZIP backup on DESTINATION before it is written over by the copy/move into place
@@ -467,15 +490,15 @@ $short_name = $copyme.Name
               $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" "zip" 
               echo "|"
               echo "| Zip archive: ""$archiveFilename"" of the wiki ..."
-              echo "|    saved in: $backupzipdir\$stem.$exten\"
+              echo "|    saved in: $backupzipdir$SEPARATOR$stem.$exten$SEPARATOR"
               
-              Make-Directory "$backupzipdir\$stem.$exten\"  
+              Make-Directory "$backupzipdir$SEPARATOR$stem.$exten$SEPARATOR"  
               $ProgressPreference = 'SilentlyContinue'
-              Compress-Archive -LiteralPath $destination -Force -CompressionLevel Optimal -DestinationPath "$backupzipdir\$stem.$exten\$archiveFilename"
+              Compress-Archive -LiteralPath $destination -Force -CompressionLevel Optimal -DestinationPath "$backupzipdir$SEPARATOR$stem.$exten$SEPARATOR$archiveFilename"
               $ProgressPreference = 'Continue'
           }
 
-        Copy-Item $copyme -Destination "$fileDir\$stem.$exten"
+        Copy-Item $copyme -Destination "$fileDir$SEPARATOR$stem.$exten"
         echo "|"
         echo "|   RESTORING: download ""$short_name"" to ..."
         echo "|        Wiki: $destination"
@@ -489,9 +512,9 @@ $short_name = $copyme.Name
                 $parrotDir = $pollies["$stem.$exten"] 
                 echo "|"
                 echo "|   Parroting: ""$stem.$exten"""
-                echo "|          to: $parrotDir$stem.$exten"
+                echo "|          to: $parrotDir$SEPARATOR$stem.$exten"
                 #echo "Attempting to parrot $stem.$exten to $parrotDir" 
-                Copy-Item $copyme -Destination "$parrotDir\$stem.$exten"
+                Copy-Item $copyme -Destination "$parrotDir$SEPARATOR$stem.$exten"
             }
         }
         echo ""
@@ -511,7 +534,8 @@ $short_name = $copyme.Name
       echo "  ||"
       echo "  || Closes in $closeSeconds seconds ..."
       start-sleep -seconds $closeSeconds
-      cls; exit
+      cls; 
+exit
     }
     else {
       echo ""
