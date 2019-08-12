@@ -44,9 +44,9 @@
 
 if ( $PSVersionTable.PSVersion.major -lt 6) {
 #These variables are available automatically in vs 6
-    $isWindows = true ;
-    $isMacOS = false ;
-    $isLinjux = false ;
+    $isWindows = $true ;
+    $isMacOS = $false ;
+    $isLinjux = $false ;
 }
 
   # --- APPLICATION NAME & VERSION 
