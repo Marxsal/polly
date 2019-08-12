@@ -41,6 +41,7 @@
   #region InternalSettings
   
  $SEPARATOR= [IO.Path]::DirectorySeparatorChar
+ $SEPREG = '[/\\]+'
 
 if ( $PSVersionTable.PSVersion.major -lt 6) {
 #These variables are available automatically in vs 6
@@ -414,7 +415,7 @@ while(1) {
     foreach($file in $files) {
       #$filePath = $[$i]
 #echo "File name before split: $file"
-      $fileName = $file.split($SEPARATOR)[-1]
+      $fileName = $file.split($SEPREG)[-1]
       echo ""
       echo "| $fileName"
       echo "|"
@@ -534,7 +535,7 @@ $short_name = $copyme.Name
       echo "  ||"
       echo "  || Closes in $closeSeconds seconds ..."
       start-sleep -seconds $closeSeconds
-      cls; 
+      # DEBUG cls; 
 exit
     }
     else {
