@@ -71,7 +71,7 @@ if($isWindows) {
 
   # --- TIMING
     # "once" timeout default: seconds to close when $mode = "once"
-    $closeSeconds = 3 
+    $closeSeconds = 3
   
   # --- PATHING & FILES
     # Script file 
@@ -300,6 +300,28 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
   # PS version
   write-host "               PowerShell:"$PsVersionTable.PSVersion
 
+  function parrot {
+#echo "I am in parrot function"
+  # Write pollies/parrots if applicable
+      if ($pollies.Count -gt 0 ) {
+        #echo "I don't think pollies is null. Am I repeating myself?"
+#$pollies
+                  #echo "Attempting to parrot $stem.$exten to $parrotDir" 
+          if($pollies.ContainsKey("$stem.$exten")) {
+              $parrotDir = $pollies["$stem.$exten"] 
+                  echo "|"
+                  echo "|   Parroting: ""$stem.$exten"""
+                  echo "|          to: $parrotDir$SEPARATOR$stem.$exten"
+                  #echo "Attempting to parrot $stem.$exten to $parrotDir" 
+                  if ($mode -eq "parrot-menu") {
+                    $copyme = get-item "$fileDir$SEPARATOR$stem.$exten"
+                  } 
+                  Copy-Item $copyme -Destination "$parrotDir$SEPARATOR$stem.$exten"
+                  
+          }
+      }
+  }
+
 # MENU ----------------------------------------
   function menu {
     echo ""
@@ -394,7 +416,7 @@ while($running) {
               'Q' {cls ; exit}
           }
   }
-  until ($selection -eq 'a' -or $selection -eq 'o')
+  until ($selection -eq 'a' -or $selection -eq 'o' -or $selection -eq 'p')
 
 #echo "Broke out of menu decider loop (pausing)"
 #start-sleep -seconds 5 
@@ -433,6 +455,8 @@ while($running) {
           $stempieces = $stempieces[0..($stempieces.length-2)]
           $stem = $stempieces -join "."
 
+
+if($mode -ne "parrot-menu") {
           $pattern = [regex]::escape($stem) +  "(\s*\(\d+\))*" + [regex]::escape('.'+$exten) 
           echo "|   Using Pat: $pattern"
           $copyme = gci $downloaddir$SEPARATOR$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort-object -property LastWriteTime | select -last 1
@@ -458,7 +482,7 @@ while($running) {
           echo "|   Comparing: ""$short_name"" in downloads with ..."
           echo "|        Wiki: $destination"
           
-          If($source.LastWriteTime -gt $destination.LastWriteTime.addSeconds(1) ) {
+          If( $source.LastWriteTime -gt $destination.LastWriteTime.addSeconds(1) ) {
               # Want to perform backup on DESTINATION before it is written over by the copy/move into place
               if($backupdir -ne $null ) {
                   $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" $exten 
@@ -490,27 +514,41 @@ while($running) {
             #echo "  Copying $copyme to $fileDir\$stem.$exten"
             #echo ""
 
-            # Write pollies/parrots if applicable
-            if ($pollies.Count -gt 0 ) {
-                #echo "I don't think pollies is null. Am I repeating myself?"
-                if($pollies.ContainsKey("$stem.$exten")) {
-                    $parrotDir = $pollies["$stem.$exten"] 
-                    echo "|"
-                    echo "|   Parroting: ""$stem.$exten"""
-                    echo "|          to: $parrotDir$SEPARATOR$stem.$exten"
-                    #echo "Attempting to parrot $stem.$exten to $parrotDir" 
-                    Copy-Item $copyme -Destination "$parrotDir$SEPARATOR$stem.$exten"
-                }
-            }
+            parrot
+
             echo ""
-          }
+          } # IF RESTORE IS NEEDED
           else {
             echo "|"
             echo "|  Restore of ""$short_name"" not required," 
             echo "|              ... this download has already been restored"
             echo ""    
-          }
-        }
+        }  # ELSE RESTORE NOT NEEDED
+
+} else { # END IF-NOT-PARROT-MENU 
+ 
+          parrot
+       }
+
+        } # END FOR-EACH-FILE LOOP
+
+
+
+        if($mode -eq "parrot-menu" ) {
+          echo ""
+          echo "  || RUN PARROT - $appAndVer"
+          echo "  ||"
+          echo "  || Run mode ""$mode"" completed!" 
+          echo "  ||"
+          echo "  || Closes in $closeSeconds seconds ..."
+          $mode = "unused"
+          start-sleep -seconds  $closeSeconds
+          # DEBUG 
+          cls 
+          break
+ 
+       }
+
         if($mode -eq "once" ) {
           echo ""
           echo "  || RUN ONCE - $appAndVer"
@@ -522,7 +560,7 @@ while($running) {
           start-sleep -seconds $closeSeconds
           # DEBUG 
           cls 
-#echo "About to break out of Once"
+          #echo "About to break out of Once"
           break 
         }
         else {
@@ -534,6 +572,7 @@ while($running) {
    } #RESTORE 
 #echo "Outside of restore loop (pausing)"
 #start-sleep -seconds 10
+
 } #RUNNING (MENU)
 
 
