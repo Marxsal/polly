@@ -71,7 +71,7 @@ if($isWindows) {
 
   # --- TIMING
     # "once" timeout default: seconds to close when $mode = "once"
-    $closeSeconds = 15
+    $closeSeconds = 3 
   
   # --- PATHING & FILES
     # Script file 
@@ -326,222 +326,217 @@ foreach ($obj in $objMembers){ $obj.Value } ; $objMembers
     echo "              $settingsFile active"
     echo "             +===========================+"
   }
+# END FUNCTION MENU
+
+$running=$true
+
+while($running) {
+#echo "INSIDE RUNNING LOOP (pausing)"
+#start-sleep -seconds 10
   do {
-    if($mode -eq "auto" -or $mode -eq "once" -or $mode -eq "once-menu"){break}
-    menu
-    $selection = read-host "?             Key"
-    switch ($selection) {
-      'A' {$mode = "auto"} 
-      'O' {$mode = "once"}
-      'P' {$mode = "parrot-menu"; cls}
-      'D' {cls; echo ""; echo ""; 
-           echo "  | SAVED DOWNLOADS (newest first) in ... "; 
-           echo "  |"; 
-           echo "  | $downloaddir\"
-           gci -path $downloaddir *.* -file | sort-object -property LastWriteTime -descending | ft Name, LastWriteTime, Length -autosize -hidetableheaders; 
-          } 
-      'T' {cls; echo ""; echo ""; 
-           echo "  | TIDDLYWIKI FOLDER $wikidir\"; 
-           echo "  |"
-           echo "  | Wikis & directories they are in ..."; 
-           gci -path $wikidir -recurse | ? -FilterScript {$_.extension -match "htm*|tw"} | sort-object -property Name | ft Name, "in", Directory -autosize -hidetableheaders;
-           #echo "" 
-          }
-      'B' {cls; echo ""
-            if($backupzipdir -ne $null){
-              echo ""
-              echo "  | ZIP ARCHIVES of Wikis";
-              echo "  |"
-              echo "  | Latest zip archive of each wiki, under: $backupzipdir\"
-              echo ""
-              gci -path $backupzipdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
+      if($mode -eq "auto" -or $mode -eq "once") {$running=$false ; break}
+      menu
+          $selection = read-host "?             Key"
+          switch ($selection) {
+              'A' {$mode = "auto"} 
+              'O' {$mode = "once"}
+              'P' {$mode = "parrot-menu"; cls}
+              'D' {cls; echo ""; echo ""; 
+                  echo "  | SAVED DOWNLOADS (newest first) in ... "; 
+                  echo "  |"; 
+                  echo "  | $downloaddir\"
+                      gci -path $downloaddir *.* -file | sort-object -property LastWriteTime -descending | ft Name, LastWriteTime, Length -autosize -hidetableheaders; 
+              } 
+              'T' {cls; echo ""; echo ""; 
+                  echo "  | TIDDLYWIKI FOLDER $wikidir\"; 
+                      echo "  |"
+                      echo "  | Wikis & directories they are in ..."; 
+                  gci -path $wikidir -recurse | ? -FilterScript {$_.extension -match "htm*|tw"} | sort-object -property Name | ft Name, "in", Directory -autosize -hidetableheaders;
 
-# --- Temporary hack for relative pathing in TEST
-#gci -path $downloaddir\$backupzipdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
-            } 
-            if($backupdir -ne $null){
-              echo ""
-              echo "  | BACKUPS of Wikis";
-              echo "  |"
-              echo "  | Latest backup of each wiki, under: $backupdir\"
-              echo ""
-              gci -path $backupdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
+              }
+              'B' {cls; echo ""
+                  if($backupzipdir -ne $null){
+                      echo ""
+                          echo "  | ZIP ARCHIVES of Wikis";
+                      echo "  |"
+                          echo "  | Latest zip archive of each wiki, under: $backupzipdir\"
+                          echo ""
+                          gci -path $backupzipdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
 
-# --- Temporary hack for relative pathing in TEST
-#gci -path $downloaddir\$backupdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
-            }
-            echo ""
-          } 
-      'S' {. .\lib\do-settings.ps1; exit} 
-      'U' {cls; runinfo; usage}
-      'H' {cls; echo ""; echo "";
-           invoke-expression "start $urlPollyHlp"
-           echo "  | ONLINE WIKI LAUNCHED ..."; 
-           echo "  |"
-           echo "  |   $urlPollyHlpDesc"
-           echo "  |"
-           echo "  |   $urlPollyHlp";  
-           echo ""     
+                          # --- Temporary hack for relative pathing in TEST
+                          #gci -path $downloaddir\$backupzipdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
+                  } 
+                  if($backupdir -ne $null){
+                      echo ""
+                          echo "  | BACKUPS of Wikis";
+                      echo "  |"
+                          echo "  | Latest backup of each wiki, under: $backupdir\"
+                          echo ""
+                          gci -path $backupdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
+
+                          # --- Temporary hack for relative pathing in TEST
+                          #gci -path $downloaddir\$backupdir *.* -recurse | where {$_.psiscontainer} | foreach {get-childitem $_.fullname | sort LastWriteTime | select -expand name -last 1}
+                  }
+                  echo ""
+              } 
+              'S' {. .\lib\do-settings.ps1; exit} 
+              'U' {cls; runinfo; usage}
+              'H' {cls; echo ""; echo "";
+                  invoke-expression "start $urlPollyHlp"
+                      echo "  | ONLINE WIKI LAUNCHED ..."; 
+                  echo "  |"
+                      echo "  |   $urlPollyHlpDesc"
+                      echo "  |"
+                      echo "  |   $urlPollyHlp";  
+                  echo ""     
+              }
+              'Z' {if($hideTests -ne "show"){cls} else {cls; echo ""; runinfo; tests}}
+              'Q' {cls ; exit}
           }
-      'Z' {if($hideTests -ne "show"){cls} else {cls; echo ""; runinfo; tests}}
-      'Q' {cls ; exit}
-    }
   }
   until ($selection -eq 'a' -or $selection -eq 'o')
 
+#echo "Broke out of menu decider loop (pausing)"
+#start-sleep -seconds 5 
+
 # RESTORER ------------------------------------
-  #region Restorer
+#region Restorer
 
-  # Make sure script now runs in downloads directory
-  # --- !! Running in downloads was a mistake on my part :-( 
-  # --- !! It breaks portability. Need to fix. !!
-  #cd $downloaddir
-   cls 
-  echo ""
-  echo "  || AUTO-RESTORE - $appAndVer"
-  echo "  ||"
-  echo "  || Every $waitSeconds seconds checks for new saves in ..."
-  echo "  ||"
-  echo "  ||   ""$downloaddir"" "
-  echo "  ||"
-  echo "  || Press [Ctrl+C] to exit"
-  echo ""
-
-  #endregion Restorer
-
-while(1) {
-
-    # OLD for($i=0;$i -lt $files.Length; $i++) {
-    foreach($file in $files) {
-      #$filePath = $[$i]
-#echo "File name before split: $file"
-      $fileName = $file.split($SEPREG)[-1]
-      echo ""
-      echo "| $fileName"
-      echo "|"
-      
-      $fileDir = $file.substring(0,$file.length - $fileName.length) 
-
-      $stempieces = $fileName.split(".")
-      $exten = $stempieces[-1].trim()
-      $stempieces = $stempieces[0..($stempieces.length-2)]
-      $stem = $stempieces -join "."
-      #echo  "Stem-dot-extension: $stem*.$exten"
-
-      # [wikiname-literal][regex-of-number-cruft][.extension-literal] 
-      # (\s*\(\d+\))*
-
-      $pattern = [regex]::escape($stem) +  "(\s*\(\d+\))*" + [regex]::escape('.'+$exten) 
-      echo "|   Using Pat: $pattern"
-      #$copyme = ls $stem*.$exten | sort LastWriteTime | select -last 1
-#echo "Parts --  dl: $downloaddir sep: $SEPARATOR stem: $stem ext: $exten"
-      $copyme = gci $downloaddir$SEPARATOR$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort-object -property LastWriteTime | select -last 1
-
-# --- TT tests on left
-$short_name = $copyme.Name
-      $copyme_fullname  = $copyme.FullName
-
-      if($copyme_fullname -eq $null) {
-        echo "|    Skipping ""$stem.$exten"" as no saves found in downloads,"
-        echo "|              ... maybe you have not downloaded it yet?"
+        cls 
         echo ""
-        #echo "Polly could not find any downloads for '$stem'."
-        #echo "Possibly you have not yet saved (downloaded) the associated file?"
-        #echo "Skipping file stem '$stem. "
-        #echo ""
-        continue ;
-      }
-      
-      $copyme = $copyme_fullname
-      #echo "Checking fullname $copyme_fullname"
+        echo "  || AUTO-RESTORE - $appAndVer"
+        echo "  ||"
+        echo "  || Every $waitSeconds seconds checks for new saves in ..."
+        echo "  ||"
+        echo "  ||   ""$downloaddir"" "
+        echo "  ||"
+        echo "  || Press [Ctrl+C] to exit"
+        echo ""
 
-      $destination = Get-Item  "$fileDir$SEPARATOR$stem.$exten"
-      $destinationTimestamp = $destination.LastWriteTime
-      #$dt = $destinationTimestamp 
-      $source = Get-Item "$copyme" 
-      echo "|   Comparing: ""$short_name"" in downloads with ..."
-      echo "|        Wiki: $destination"
-      
-      If($source.LastWriteTime -gt $destination.LastWriteTime.addSeconds(1) ) {
-          # Want to perform backup on DESTINATION before it is written over by the copy/move into place
-          if($backupdir -ne $null) {
-              #$formattedTimestamp = Get-Date -Date $destinationTimestamp -Format "yyyy-MM-dd_HHmmss"
-              #$archiveFilename = "$stem-$exten-$(get-date -f yyyy-MM-dd_HH-mm-ss).$exten"
-              #$archiveFilename = "$stem-$exten-$(get-date -Date ""$destinationTimestamp"" -f yyyy-MM-dd_HHmmss).$exten"
-              #$archiveFilename = "$stem-$exten-$(get-date -year $dt.year -month $dt.month -day $dt.day -hour $dt.hour -minute $dt.minute -second $dt.second -millisecond $dt.millisecond -f yyyy-MM-dd_HHmmss).$exten"
-              #$archiveFilename = generate-archivestring $destinationTimestamp $stem $exten   
-              $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" $exten 
-              echo "|"
-              echo "|      Backup: ""$archiveFilename"" of wiki ..."
-              echo "|    saved in: $backupdir$SEPARATOR$stem.$exten\"
-              #echo "Making backup from $destination to $backupdir\$archiveFilename"
+#endregion Restorer
 
-              #$ProgressPreference = 'SilentlyContinue'
-              #echo  "$backupdir\$stem.$exten\"
-              #md -Path "$backupdir\$stem.$exten\" 
-              Make-Directory "$backupdir$SEPARATOR$stem.$exten$SEPARATOR"  
-              Copy-item $destination -Destination "$backupdir$SEPARATOR$stem.$exten$SEPARATOR$archiveFilename"
-              #$ProgressPreference = 'Continue'
+    while(1) {
+#echo "INSIDE RESTORER LOOP"
+        # OLD for($i=0;$i -lt $files.Length; $i++) 
+        foreach($file in $files) {
+          #$filePath = $[$i]
+          #echo "File name before split: $file"
+          $fileName = $file.split($SEPREG)[-1]
+          echo ""
+          echo "| $fileName"
+          echo "|"
+          
+          $fileDir = $file.substring(0,$file.length - $fileName.length) 
+
+          $stempieces = $fileName.split(".")
+          $exten = $stempieces[-1].trim()
+          $stempieces = $stempieces[0..($stempieces.length-2)]
+          $stem = $stempieces -join "."
+
+          $pattern = [regex]::escape($stem) +  "(\s*\(\d+\))*" + [regex]::escape('.'+$exten) 
+          echo "|   Using Pat: $pattern"
+          $copyme = gci $downloaddir$SEPARATOR$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort-object -property LastWriteTime | select -last 1
+
+          
+          $short_name = $copyme.Name
+          $copyme_fullname  = $copyme.FullName
+
+          if($copyme_fullname -eq $null) {
+            echo "|    Skipping ""$stem.$exten"" as no saves found in downloads,"
+            echo "|              ... maybe you have not downloaded it yet?"
+            echo ""
+            continue ;
           }
-          # Want to perform ZIP backup on DESTINATION before it is written over by the copy/move into place
-          if($backupzipdir -ne $null) { 
-              #$archiveFilename = "$stem-$exten-$(get-date -f yyyy-MM-dd_HH-mm-ss).zip"
-              #$archiveFilename = "$stem-$exten-$(get-date -Date ""$destinationTimestamp"" -f yyyy-MM-dd_HHmmss).zip"
-              #$archiveFilename = generate-archivestring $destinationTimestamp $stem "zip" 
-              $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" "zip" 
-              echo "|"
-              echo "| Zip archive: ""$archiveFilename"" of the wiki ..."
-              echo "|    saved in: $backupzipdir$SEPARATOR$stem.$exten$SEPARATOR"
-              
-              Make-Directory "$backupzipdir$SEPARATOR$stem.$exten$SEPARATOR"  
-              $ProgressPreference = 'SilentlyContinue'
-              Compress-Archive -LiteralPath $destination -Force -CompressionLevel Optimal -DestinationPath "$backupzipdir$SEPARATOR$stem.$exten$SEPARATOR$archiveFilename"
-              $ProgressPreference = 'Continue'
-          }
+          
+          $copyme = $copyme_fullname
+          #echo "Checking fullname $copyme_fullname"
 
-        Copy-Item $copyme -Destination "$fileDir$SEPARATOR$stem.$exten"
-        echo "|"
-        echo "|   RESTORING: download ""$short_name"" to ..."
-        echo "|        Wiki: $destination"
-        #echo "  Copying $copyme to $fileDir\$stem.$exten"
-        #echo ""
+          $destination = Get-Item  "$fileDir$SEPARATOR$stem.$exten"
+          $destinationTimestamp = $destination.LastWriteTime
+          #$dt = $destinationTimestamp 
+          $source = Get-Item "$copyme" 
+          echo "|   Comparing: ""$short_name"" in downloads with ..."
+          echo "|        Wiki: $destination"
+          
+          If($source.LastWriteTime -gt $destination.LastWriteTime.addSeconds(1) ) {
+              # Want to perform backup on DESTINATION before it is written over by the copy/move into place
+              if($backupdir -ne $null ) {
+                  $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" $exten 
+                  echo "|"
+                  echo "|      Backup: ""$archiveFilename"" of wiki ..."
+                  echo "|    saved in: $backupdir$SEPARATOR$stem.$exten\"
+                  #echo "Making backup from $destination to $backupdir\$archiveFilename"
 
-        # Write pollies/parrots if applicable
-        if ($pollies.Count -gt 0 ) {
-            #echo "I don't think pollies is null. Am I repeating myself?"
-            if($pollies.ContainsKey("$stem.$exten")) {
-                $parrotDir = $pollies["$stem.$exten"] 
-                echo "|"
-                echo "|   Parroting: ""$stem.$exten"""
-                echo "|          to: $parrotDir$SEPARATOR$stem.$exten"
-                #echo "Attempting to parrot $stem.$exten to $parrotDir" 
-                Copy-Item $copyme -Destination "$parrotDir$SEPARATOR$stem.$exten"
+                  Make-Directory "$backupdir$SEPARATOR$stem.$exten$SEPARATOR"  
+                  Copy-item $destination -Destination "$backupdir$SEPARATOR$stem.$exten$SEPARATOR$archiveFilename"
+              }
+              # Want to perform ZIP backup on DESTINATION before it is written over by the copy/move into place
+              if($backupzipdir -ne $null ) { 
+                  $archiveFilename = generate-archivestring $destinationTimestamp "$stem-$exten" "zip" 
+                  echo "|"
+                  echo "| Zip archive: ""$archiveFilename"" of the wiki ..."
+                  echo "|    saved in: $backupzipdir$SEPARATOR$stem.$exten$SEPARATOR"
+                  
+                  Make-Directory "$backupzipdir$SEPARATOR$stem.$exten$SEPARATOR"  
+                  $ProgressPreference = 'SilentlyContinue'
+                  Compress-Archive -LiteralPath $destination -Force -CompressionLevel Optimal -DestinationPath "$backupzipdir$SEPARATOR$stem.$exten$SEPARATOR$archiveFilename"
+                  $ProgressPreference = 'Continue'
+              }
+
+            Copy-Item $copyme -Destination "$fileDir$SEPARATOR$stem.$exten"
+            echo "|"
+            echo "|   RESTORING: download ""$short_name"" to ..."
+            echo "|        Wiki: $destination"
+            #echo "  Copying $copyme to $fileDir\$stem.$exten"
+            #echo ""
+
+            # Write pollies/parrots if applicable
+            if ($pollies.Count -gt 0 ) {
+                #echo "I don't think pollies is null. Am I repeating myself?"
+                if($pollies.ContainsKey("$stem.$exten")) {
+                    $parrotDir = $pollies["$stem.$exten"] 
+                    echo "|"
+                    echo "|   Parroting: ""$stem.$exten"""
+                    echo "|          to: $parrotDir$SEPARATOR$stem.$exten"
+                    #echo "Attempting to parrot $stem.$exten to $parrotDir" 
+                    Copy-Item $copyme -Destination "$parrotDir$SEPARATOR$stem.$exten"
+                }
             }
+            echo ""
+          }
+          else {
+            echo "|"
+            echo "|  Restore of ""$short_name"" not required," 
+            echo "|              ... this download has already been restored"
+            echo ""    
+          }
         }
-        echo ""
-      }
-      else {
-        echo "|"
-        echo "|  Restore of ""$short_name"" not required," 
-        echo "|              ... this download has already been restored"
-        echo ""    
-      }
-    }
-    if($mode -eq "once") {
-      echo ""
-      echo "  || RUN ONCE - $appAndVer"
-      echo "  ||"
-      echo "  || Run mode ""$mode"" completed!" 
-      echo "  ||"
-      echo "  || Closes in $closeSeconds seconds ..."
-      start-sleep -seconds $closeSeconds
-      # DEBUG cls; 
-exit
-    }
-    else {
-      echo ""
-      echo "  || Polly is pausing for $waitSeconds seconds ..."
-      start-sleep -seconds $waitSeconds 
-      echo ""
-    }
-  }
+        if($mode -eq "once" ) {
+          echo ""
+          echo "  || RUN ONCE - $appAndVer"
+          echo "  ||"
+          echo "  || Run mode ""$mode"" completed!" 
+          echo "  ||"
+          echo "  || Closes in $closeSeconds seconds ..."
+          $mode = "unused"
+          start-sleep -seconds $closeSeconds
+          # DEBUG 
+          cls 
+#echo "About to break out of Once"
+          break 
+        }
+        else {
+          echo ""
+          echo "  || Polly is pausing for $waitSeconds seconds ..."
+          start-sleep -seconds $waitSeconds 
+          echo ""
+       } #IF
+   } #RESTORE 
+#echo "Outside of restore loop (pausing)"
+#start-sleep -seconds 10
+} #RUNNING (MENU)
+
+
+#echo "Outside of running loop (pausing)"
+
+#start-sleep -seconds 10
