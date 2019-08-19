@@ -2,7 +2,7 @@
 
 # GET COMMAND-LINE PARAMETERS -----------------
   param ([string]$ini, [string]$run); 
-  cls
+  #cls MAS
 
 # SET RUN LOCATION ----------------------------
   Set-Location "$PSScriptRoot"
@@ -42,7 +42,7 @@
   #region InternalSettings
 
   # --- APPLICATION NAME & VERSION 
-    $appAndVer = "POLLY v0.1Na-TT (PS5/PS6)"
+    $appAndVer = "POLLY v0.1Pa-MS (PS5/PS6)"
   
   # --- IF PS 6+/CORE NOT RUNNING: do Windows only
     if($PSVersionTable.PSVersion.major -lt 6) {
@@ -124,7 +124,16 @@
   # --- GET SETTINGS FROM .INI FILE 
     $settings = Get-IniContent "$scriptDir/$settingsFile"; 
     $general = $settings["general"] ;
-    $filesHolder = $settings["wikis"].values ;
+ 
+  # --- DOWNLOADS DIRECTORY: where browser downloads go
+    $downloaddir = $general["downloaddir"]
+    # If not defined use o/s "userprofile" variable
+    if ([string]::IsNullOrEmpty($downloaddir)){$downloaddir = "$Env:userprofile\Downloads"}
+    # Expand dir in case it contains environmental variables. Also conform to absolute address
+    $downloaddir = expand-dir($downloaddir)
+    # ?? should add a path check ?? Some (few?) users reset through registry the downloads dir!
+
+   $filesHolder = $settings["wikis"].values ;
 
     # Parse files, convert to absolute paths
     #echo "I think count is $files.length"
@@ -141,6 +150,42 @@
         $files += $file  
         #echo "Expanded and absoluted file: $file"
     }
+
+# Get all htm/html files from specified "wikis" directories
+
+    #echo "Download dir is at: $downloaddir"
+    $dirsHolder = $settings["wikidirs"].values ;
+    foreach($dir in $dirsHolder) {
+        echo "File before expansion: $dir"
+            $dir = expand-dir($dir) 
+            echo "File after expansion: $dir"
+            if(test-path -path $dir -pathtype "container" ) {
+                echo "Comparing paths $dir and $downloaddir BEFORE"
+                    if( (join-path $dir '') -eq (join-path $downloaddir '')) {
+                        echo "Can not use download directory as wikis dir."
+                    } else {
+                        echo "Dir $dir passes directory tests"
+                        #$temp = compare-object -ReferenceObject $downloaddir -DifferenceObject $dir 
+                        #$temp | select-object -property * -erroraction stop
+
+                            echo "Comparing paths $dir and $downloaddir AFTER"
+                            #Get-ChildItem  -path $dir -recurse | ? -FilterScript {$_.extension -match "htm*|tw"} | sort-object -property Name | Format-Table Name, "in", Fullname -autosize -hidetableheaders;
+                            $wfiles = Get-ChildItem  -path $dir -exclude $downloaddir | ? -FilterScript {$_.extension -match "htm*|tw"} 
+                            $wfiles | select-object
+                            foreach($file in $wfiles) {
+                                #echo $file.fullname
+                                #$file | select-object          
+                                $files += $file.fullname  
+                                #get-member #-InputObject $files
+                            }       
+                    }
+            } else {
+                echo "$dir is not a directory"
+            }                
+    }
+
+
+
 
   $parrots = $settings["parrots"].values ;
 
@@ -173,14 +218,7 @@ if ($pollies.Count -gt 0 ) {
   # --- DESCRIPTION (optional): useful if you have more than one .ini file
     $inidescription = $general["inidescription"]
 
-  # --- DOWNLOADS DIRECTORY: where browser downloads go
-    $downloaddir = $general["downloaddir"]
-    # If not defined use o/s "userprofile" variable
-    if ([string]::IsNullOrEmpty($downloaddir)){$downloaddir = "$Env:userprofile\Downloads"}
-    # Expand dir in case it contains environmental variables. Also conform to absolute address
-    $downloaddir = expand-dir($downloaddir)
-    # ?? should add a path check ?? Some (few?) users reset through registry the downloads dir!
-  
+ 
   # --- WIKIS DIRECTORY (optional): useful where wikis are nested under one directory
     $wikidir = $general["wikidir"]
       
@@ -404,7 +442,9 @@ while($running) {
                 echo ""     
               }
               'Z' {if($hideTests -ne "show"){cls} else {cls; echo ""; runinfo; tests}}
-              'Q' {cls ; exit}
+              'Q' {
+#cls MAS ; 
+exit}
           }
   }
   until ($selection -eq 'a' -or $selection -eq 'o' -or $selection -eq 'p')
@@ -415,7 +455,7 @@ while($running) {
 # RESTORER ------------------------------------
 #region Restorer
 
-        cls 
+        # cls MAS
         echo ""
         echo "  || AUTO-RESTORE - $appAndVer"
         echo "  ||"
@@ -548,7 +588,7 @@ if($mode -ne "parrot-menu") {
           $mode = "menu"
           start-sleep -seconds $closeSeconds
           # DEBUG 
-          cls 
+          #cls MAS 
           #echo "About to break out of Once"
           break 
         }
