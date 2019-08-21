@@ -7,6 +7,8 @@
 # SET RUN LOCATION ----------------------------
   Set-Location "$PSScriptRoot"
 
+  $stemtracker = @{} # Map to keep track of unique stems.
+
 # LOAD LIBRARIES ------------------------------
   #region LoadLibraries
 
@@ -14,6 +16,39 @@
     . ./lib/Get-IniContent.ps1 
     # Core libraries used
     $libs = "./lib/Get-IniContent.ps1, ./lib/do-settings.ps1"
+
+    function check-filedupes( [string]$pFile1) {
+        #param( [string]$pFullname )
+        $fullstem = $pFile1.split($SEPREG)[-1]
+        if( $stemtracker.containskey( $fullstem)) {
+            $file2 = $stemtracker[$fullstem]
+            echo ""
+            echo "=== DUPLICATE STEM ==="
+            echo "Stem file $fullstem for "
+            echo "$pFile1 is already in use by file "
+            echo "$file2 . Please check your wiki file list "
+            echo "and wiki dirs and eliminate duplicates."
+            echo "Polly will now close in $closeSeconds seconds"
+            start-sleep -seconds  $closeSeconds
+                exit
+        }
+    }
+
+ ### FOLLOWING FUNCTION CAN BE DELETED
+  function get-fullstem {
+
+      param( [string]$pFullname )
+          $fileName = $pFullname.split($SEPREG)[-1]
+          #echo ""
+          #echo "| $fileName"
+          #echo "|"
+          
+          $stempieces = $fileName.split(".")
+          $exten = $stempieces[-1].trim()
+          $stempieces = $stempieces[0..($stempieces.length-2)]
+          $stem = $stempieces -join "."
+      return $stem.$exten
+  }
 
     # ???
     function expand-dir {
@@ -42,7 +77,11 @@
   #region InternalSettings
 
   # --- APPLICATION NAME & VERSION 
-    $appAndVer = "POLLY v0.1Pa-MS (PS5/PS6)"
+    $appAndVer = "POLLY v0.1Pb-MS (PS5/PS6)"
+
+  # --- PATH SEPARATORS: support o/s variations 
+    $SEPARATOR= [IO.Path]::DirectorySeparatorChar
+    $SEPREG = '[/\\]+'
   
   # --- IF PS 6+/CORE NOT RUNNING: do Windows only
     if($PSVersionTable.PSVersion.major -lt 6) {
@@ -51,10 +90,6 @@
       $isMacOS   = $false;
       $isLinux   = $false;
     }
-
-  # --- PATH SEPARATORS: support o/s variations 
-    $SEPARATOR= [IO.Path]::DirectorySeparatorChar
-    $SEPREG = '[/\\]+'
 
   # --- CONSOLE: ?? Not clear yet how cross-platform these settings can be ??
     $psHost = get-host
@@ -147,7 +182,9 @@
         #if( ![System.IO.Path]::IsPathRooted($file) ) {
         #    $file = "$scriptDir\$file"
         #}
+        check-filedupes $file.fullname
         $files += $file  
+        $stemtracker[$fullstem] = $file.fullname
         #echo "Expanded and absoluted file: $file"
     }
 
@@ -175,7 +212,13 @@
                             foreach($file in $wfiles) {
                                 #echo $file.fullname
                                 #$file | select-object          
+                                $fullstem = $file.fullname.split($SEPREG)[-1]
+                                #$fullstem = get-fullstem $file.fullname
+
+                                echo "Fullstem is: $fullstem"
+                                check-filedupes $file.fullname
                                 $files += $file.fullname  
+                                $stemtracker[$fullstem] = $file.fullname
                                 #get-member #-InputObject $files
                             }       
                     }
