@@ -7,6 +7,7 @@ Effectively, this becomes a new way to save your files, but with these features:
 - Human-readable batch script.
 - No special plugins in your TiddlyWiki file
 - No special browser required
+- No browser extension required.
 - No need for node.exe running in background 
 - Total size expanded package only 100k
 - Backups as regular file and/or zip to specified directories
