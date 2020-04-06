@@ -42,7 +42,7 @@
   #region InternalSettings
 
   # --- APPLICATION NAME & VERSION 
-    $appAndVer = "POLLY v0.1Na-TT (PS5/PS6)"
+    $appAndVer = "POLLY v0.1Nb-MS (PS5/PS6/PS7)"
   
   # --- IF PS 6+/CORE NOT RUNNING: do Windows only
     if($PSVersionTable.PSVersion.major -lt 6) {
@@ -434,9 +434,11 @@ while($running) {
         foreach($file in $files) {
           #$filePath = $[$i]
           #echo "File name before split: $file"
-          $fileName = $file.split($SEPREG)[-1]
+          #$fileName = $file.split($SEPREG)[-1] # We don't need this -- PS has tools for file path splitting
+          #echo "Splitting a different way: "
+          $fileName = Split-Path -Leaf $file ;
           echo ""
-          echo "| $fileName"
+          echo "| $fileName " 
           echo "|"
           
           $fileDir = $file.substring(0,$file.length - $fileName.length) 
@@ -450,6 +452,9 @@ while($running) {
 if($mode -ne "parrot-menu") {
           $pattern = [regex]::escape($stem) +  "(\s*\(\d+\))*" + [regex]::escape('.'+$exten) 
           echo "|   Using Pat: $pattern"
+          #echo "|   Using Stm: $stem" # MAS
+          #echo "|   Using ext: $exten" # MAS
+          #echo "|   Separator is: $SEPARATOR" #MAS 
           $copyme = Get-ChildItem $downloaddir$SEPARATOR$stem*.$exten | Where-Object  {$_.Name -match  $pattern } | sort-object -property LastWriteTime | select -last 1
 
           
@@ -502,8 +507,8 @@ if($mode -ne "parrot-menu") {
             echo "|"
             echo "|   RESTORING: download ""$short_name"" to ..."
             echo "|        Wiki: $destination"
-            #echo "  Copying $copyme to $fileDir\$stem.$exten"
-            #echo ""
+            echo "  Copying $copyme to $fileDir\$stem.$exten"
+            echo ""
 
             parrot
 
@@ -548,7 +553,7 @@ if($mode -ne "parrot-menu") {
           $mode = "menu"
           start-sleep -seconds $closeSeconds
           # DEBUG 
-          cls 
+          cls #MAS - Sometimes need to turn this off during testing.
           #echo "About to break out of Once"
           break 
         }

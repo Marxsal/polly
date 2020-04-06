@@ -1,6 +1,17 @@
 # polly
 Batch file system using Windows Powershell to restore TiddlyWiki files from download directory to their original home directory
 
+Effectively, this becomes a new way to save your files, but with these features:
+
+- No binary executables
+- Human-readable batch script.
+- No special plugins in your TiddlyWiki file
+- No special browser required
+- No need for node.exe running in background 
+- Total size expanded package only 100k
+- Backups as regular file and/or zip to specified directories
+- The ability to "parrot" extra copies to target directories (e.g. a Dropbox folder)
+
 ## Disclaimer
 
 **WARNING!** This should be considered Beta or Alpha level software. It has not been tested under all possible
@@ -12,8 +23,10 @@ of files.
 
 ## Prerequisites
 
-- Windows 7 or 10
-- Powershell 5
+- Windows 7 or 10 
+    - May work with Linux or Mac with Powershell installed. 
+- Powershell 5+
+- Linux with Powershell
 
 It may actually work with earlier versions of Powershell, but some menus may disappear. You can download
 Powershell 5 from MicroSoft for free. 
@@ -25,6 +38,12 @@ Powershell 5 from MicroSoft for free.
 - Unzip the file wherever you want to run
 - Run polly.bat to begin. This will offer you the chance to set up your own settings.ini file.
 - Alternatively, you may want to set up your own settings.ini file by hand.
+
+### Known adjustments for Linux (and probably Mac)
+
+- For Mac or Linux, you may need to edit or modify polly.bat and other files. e.g.
+    - chmod 744 polly.bat
+    - Change \ to / inside of polly.bat
 
 ## From the Usage file
 
