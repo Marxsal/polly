@@ -1,4 +1,4 @@
-﻿# polly-01Na-TT.ps1 -- PS5/PS6
+﻿# polly-01Oa-MS.ps1 -- PS5/PS6/PS7
 
 # GET COMMAND-LINE PARAMETERS -----------------
   param ([string]$ini, [string]$run); 
@@ -16,10 +16,11 @@
     . ./lib/Get-IniContent.ps1 
     # Core libraries used
     $libs = "./lib/Get-IniContent.ps1, ./lib/do-settings.ps1"
-
+# MAS Marker (c)heck-filedupes
     function check-filedupes( [string]$pFile1) {
         #param( [string]$pFullname )
-        $fullstem = $pFile1.split($SEPREG)[-1]
+        #$fullstem = $pFile1.split($SEPREG)[-1]
+        $fullstem = Split-Path -Leaf $pFile1 ;
         if( $stemtracker.containskey( $fullstem)) {
             $file2 = $stemtracker[$fullstem]
             echo ""
@@ -32,6 +33,7 @@
             start-sleep -seconds  $closeSeconds
                 exit
         }
+        return $fullstem
     }
 
  ### FOLLOWING FUNCTION CAN BE DELETED
@@ -77,7 +79,7 @@
   #region InternalSettings
 
   # --- APPLICATION NAME & VERSION 
-    $appAndVer = "POLLY v0.1Pb-MS (PS5/PS6)"
+    $appAndVer = "POLLY v0.1Oa-MS (PS5/PS6/PS7)"
 
   # --- PATH SEPARATORS: support o/s variations 
     $SEPARATOR= [IO.Path]::DirectorySeparatorChar
@@ -176,13 +178,16 @@
     $files = @()
     #for ($i = 0; $i -le ($files.length - 1); $i += 1) {
     foreach($file in $filesHolder) {
-#echo "File before expansion: $file"
+echo "File before expansion: $file"
         $file = expand-dir($file) 
-#echo "File after expansion: $file"
+echo "File after expansion: $file"
+$file_obj = Get-ChildItem $file 
+$file_fullname = $file_obj.fullname ;
+echo "File fullname: $file_fullname"
         #if( ![System.IO.Path]::IsPathRooted($file) ) {
         #    $file = "$scriptDir\$file"
         #}
-        check-filedupes $file.fullname
+        $fullstem = check-filedupes $file_fullname 
         $files += $file  
         $stemtracker[$fullstem] = $file.fullname
         #echo "Expanded and absoluted file: $file"
@@ -517,7 +522,9 @@ exit}
         foreach($file in $files) {
           #$filePath = $[$i]
           #echo "File name before split: $file"
-          $fileName = $file.split($SEPREG)[-1]
+          #$fileName = $file.split($SEPREG)[-1] # We don't need this -- PS has tools for file path splitting
+          #echo "Splitting a different way: "
+          $fileName = Split-Path -Leaf $file ;
           echo ""
           echo "| $fileName"
           echo "|"
