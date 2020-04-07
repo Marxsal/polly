@@ -178,12 +178,12 @@
     $files = @()
     #for ($i = 0; $i -le ($files.length - 1); $i += 1) {
     foreach($file in $filesHolder) {
-echo "File before expansion: $file"
+	#echo "File before expansion: $file"
         $file = expand-dir($file) 
-echo "File after expansion: $file"
-$file_obj = Get-ChildItem $file 
-$file_fullname = $file_obj.fullname ;
-echo "File fullname: $file_fullname"
+	#echo "File after expansion: $file"
+	$file_obj = Get-ChildItem $file 
+	$file_fullname = $file_obj.fullname ;
+	#echo "File fullname: $file_fullname"
         #if( ![System.IO.Path]::IsPathRooted($file) ) {
         #    $file = "$scriptDir\$file"
         #}
@@ -196,32 +196,35 @@ echo "File fullname: $file_fullname"
 # Get all htm/html files from specified "wikis" directories
 
     #echo "Download dir is at: $downloaddir"
-    $dirsHolder = $settings["wikidirs"].values ;
+    $dirsHolder = $settings["wikidirs"].values 
+    #echo $dirsHolder
     foreach($dir in $dirsHolder) {
-        echo "File before expansion: $dir"
+        # echo "File before expansion: $dir"
             $dir = expand-dir($dir) 
-            echo "File after expansion: $dir"
+            # echo "File after expansion: $dir"
             if(test-path -path $dir -pathtype "container" ) {
-                echo "Comparing paths $dir and $downloaddir BEFORE"
+                # echo "Comparing paths $dir and $downloaddir BEFORE"
                     if( (join-path $dir '') -eq (join-path $downloaddir '')) {
-                        echo "Can not use download directory as wikis dir."
+                         echo "Can not use download directory as wikis dir."
                     } else {
-                        echo "Dir $dir passes directory tests"
+                        # echo "Dir $dir passes directory tests"
                         #$temp = compare-object -ReferenceObject $downloaddir -DifferenceObject $dir 
                         #$temp | select-object -property * -erroraction stop
 
-                            echo "Comparing paths $dir and $downloaddir AFTER"
+                            # echo "Comparing paths $dir and $downloaddir AFTER"
                             #Get-ChildItem  -path $dir -recurse | ? -FilterScript {$_.extension -match "htm*|tw"} | sort-object -property Name | Format-Table Name, "in", Fullname -autosize -hidetableheaders;
                             $wfiles = Get-ChildItem  -path $dir -exclude $downloaddir | ? -FilterScript {$_.extension -match "htm*|tw"} 
-                            $wfiles | select-object
+                            #$wfiles | select-object
                             foreach($file in $wfiles) {
                                 #echo $file.fullname
                                 #$file | select-object          
+				# MAS This seems to work, but keep in mind:
+				# $fullstem = Split-Path -Leaf $pFile1 
                                 $fullstem = $file.fullname.split($SEPREG)[-1]
                                 #$fullstem = get-fullstem $file.fullname
 
-                                echo "Fullstem is: $fullstem"
-                                check-filedupes $file.fullname
+                                #echo "Fullstem is: $fullstem"
+                                $dummy = check-filedupes $file.fullname
                                 $files += $file.fullname  
                                 $stemtracker[$fullstem] = $file.fullname
                                 #get-member #-InputObject $files
@@ -491,7 +494,7 @@ while($running) {
               }
               'Z' {if($hideTests -ne "show"){cls} else {cls; echo ""; runinfo; tests}}
               'Q' {
-#cls MAS ; 
+cls #MAS ; 
 exit}
           }
   }
@@ -503,7 +506,7 @@ exit}
 # RESTORER ------------------------------------
 #region Restorer
 
-        # cls MAS
+        cls # MAS
         echo ""
         echo "  || AUTO-RESTORE - $appAndVer"
         echo "  ||"
@@ -638,7 +641,7 @@ if($mode -ne "parrot-menu") {
           $mode = "menu"
           start-sleep -seconds $closeSeconds
           # DEBUG 
-          #cls MAS 
+          cls # MAS 
           #echo "About to break out of Once"
           break 
         }
